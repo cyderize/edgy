@@ -66,4 +66,24 @@ Map.prototype.toXML = function (serializer, mediaContext) {
     return serializer.format('<map>%</map>', xml);
 };
 
+BlockMorph.prototype.toBlockXML = function (serializer) {
+    return serializer.format(
+        '<block s="@"%>%%</block>',
+        this.selector,
+        this.breakPoint ? ' breakpoint="true"' : '',
+        serializer.store(this.inputs()),
+        this.comment ? this.comment.toXML(serializer) : ''
+    );
+};
+
+SnapSerializer.prototype.loadBlock = (function(oldLoadBlock) {
+    return function (model, isReporter) {
+        var block = oldLoadBlock.call(this, model, isReporter);
+        if (model.attributes.breakpoint) {
+            block.enableBreakPoint();
+        }
+        return block;
+    };
+}(SnapSerializer.prototype.loadBlock));
+
 }());
